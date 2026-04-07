@@ -31,7 +31,7 @@ STATIONS = [
     {"net":"GE","sta":"BNDI","cha":"BHZ","lat": -4.52,"lon":129.9,"label":"BandaNeira"},
     # Papua
     {"net":"GE","sta":"FAKI","cha":"BHZ","lat":-2.92,"lon":132.24,"label":"Fak-Fak"},
-    {"net":"GE","sta":"GENI","cha":"BHZ","lat":-2.59,"lon":140.17°,"label":"Jayapura"},
+    {"net":"GE","sta":"GENI","cha":"BHZ","lat":-2.59,"lon":140.17,"label":"Jayapura"},
 ]
 
 GEOFON_HOST     = "geofon.gfz-potsdam.de"
