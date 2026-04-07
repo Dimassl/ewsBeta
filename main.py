@@ -5,8 +5,6 @@ from obspy.signal.trigger import classic_sta_lta, trigger_onset
 from scipy.optimize import minimize
 import websockets, os
 
-# ── Stasiun Indonesia di GEOFON ──────────────────────────────
-# Semakin banyak stasiun → lokasi makin akurat
 STATIONS = [
     # Jawa
     {"net":"GE","sta":"BBJI","cha":"BHZ","lat":-7.22,"lon":107.85,"label":"Garut"},
@@ -36,29 +34,29 @@ STATIONS = [
 
 GEOFON_HOST     = "geofon.gfz-potsdam.de"
 GEOFON_PORT     = 18000
-P_VELOCITY      = 6.0        # km/s kecepatan P-wave rata-rata kerak
-TRIGGER_THR_ON  = 10.5        # STA/LTA threshold trigger
+P_VELOCITY      = 6.0        
+TRIGGER_THR_ON  = 9.5        
 TRIGGER_THR_OFF = 0.8
-MIN_STATIONS    = 3          # minimum stasiun untuk hitung lokasi
-ASSOC_WINDOW    = 120        # detik — window asosiasi trigger antar stasiun
-EARTH_R         = 6371.0     # km radius bumi
+MIN_STATIONS    = 3         
+ASSOC_WINDOW    = 120        
+EARTH_R         = 6371.0     
 
-# ── State per stasiun ─────────────────────────────────────────
+
 sta_buffers = {}
 for s in STATIONS:
     sta_buffers[s["sta"]] = {
         "data"       : collections.deque(maxlen=6000),
         "sr"         : 20.0,
         "triggered"  : False,
-        "trigger_time": None,   # UTC epoch saat P-wave tiba
+        "trigger_time": None,  
         "peak_amp"   : 0.0,
     }
 
 lock         = threading.Lock()
-active_events = {}     # id_event → dict info
-connected_ws  = set()  # WebSocket clients
+active_events = {}     
+connected_ws  = set()  
 
-# ── Jarak great-circle (km) ──────────────────────────────────
+
 def dist_km(lat1, lon1, lat2, lon2):
     r   = math.pi / 180
     dlat = (lat2 - lat1) * r
@@ -67,7 +65,7 @@ def dist_km(lat1, lon1, lat2, lon2):
           math.cos(lat1*r)*math.cos(lat2*r)*math.sin(dlon/2)**2
     return 2 * EARTH_R * math.asin(math.sqrt(a))
 
-# ── Estimasi lokasi episenter (grid search + least squares) ──
+
 def locate_epicenter(triggers):
     """
     triggers: list dict {sta, lat, lon, t_arrive}
@@ -76,7 +74,7 @@ def locate_epicenter(triggers):
     if len(triggers) < 3:
         return None
 
-    # Rata-rata lokasi stasiun sebagai titik awal
+   
     lat0 = np.mean([t["lat"] for t in triggers])
     lon0 = np.mean([t["lon"] for t in triggers])
     t0   = min(t["t_arrive"] for t in triggers) - 30  # estimasi OT awal
@@ -115,7 +113,7 @@ def locate_epicenter(triggers):
         "rms"      : rms,
     }
 
-# ── Estimasi magnitudo (Ml) ───────────────────────────────────
+
 def estimate_magnitude(triggers, epicenter):
     mls = []
     for tr in triggers:
@@ -131,7 +129,7 @@ def estimate_magnitude(triggers, epicenter):
         return None
     return round(float(np.median(mls)), 1)
 
-# ── Estimasi MMI ──────────────────────────────────────────────
+
 def estimate_mmi(magnitude, depth_km=10.0):
     if magnitude is None:
         return "I"
@@ -141,9 +139,9 @@ def estimate_mmi(magnitude, depth_km=10.0):
     mmi_str = ["I","II","III","IV","V","VI","VII","VIII","IX","X"]
     return mmi_str[mmi - 1]
 
-# ── Estimasi nama region dari koordinat ──────────────────────
+
 def region_name(lat, lon):
-    # Kasar berdasarkan bounding box pulau utama
+   
     regions = [
         (-8.5, -5.5, 105.0, 115.9, "Jawa"),
         (-5.9,  5.7,  95.0, 108.5, "Sumatera"),
@@ -156,7 +154,7 @@ def region_name(lat, lon):
     for latmin, latmax, lonmin, lonmax, name in regions:
         if latmin <= lat <= latmax and lonmin <= lon <= lonmax:
             return name
-    # Arah dari pusat Indonesia
+   
     clat, clon = -2.5, 118.0
     bearing = math.degrees(math.atan2(lon - clon, lat - clat))
     dirs    = ["Utara","TimurLaut","Timur","Tenggara",
@@ -164,7 +162,7 @@ def region_name(lat, lon):
     idx = int((bearing + 202.5) % 360 / 45)
     return f"Perairan {dirs[idx]} Indonesia"
 
-# ── Proses trigger — cek apakah cukup stasiun & hitung ───────
+
 def process_triggers():
     now = time.time()
     with lock:
@@ -185,12 +183,12 @@ def process_triggers():
     if len(triggers) < MIN_STATIONS:
         return None
 
-    # Cek apakah sudah ada event aktif yang sama
+   
     event_key = f"{int(min(t['t_arrive'] for t in triggers) / 60)}"
     if event_key in active_events:
         return None  # sudah dikirim
 
-    # Hitung lokasi
+   
     epicenter = locate_epicenter(triggers)
     if epicenter is None or epicenter["rms"] > 15:
         return None
@@ -199,7 +197,7 @@ def process_triggers():
     if mag is None or mag < 2.5:
         return None
 
-    depth = 10.0  # default, bisa dikembangkan dengan fase pS-pP
+    depth = 10.0 
     mmi   = estimate_mmi(mag, depth)
     region = region_name(epicenter["lat"], epicenter["lon"])
 
@@ -223,7 +221,7 @@ def process_triggers():
           f"lon={epicenter['lon']:.2f} MMI={mmi} n={len(triggers)}")
     return event
 
-# ── SeedLink client ───────────────────────────────────────────
+
 class EWSClient(EasySeedLinkClient):
     def on_data(self, trace):
         sta = trace.stats.station
@@ -232,14 +230,14 @@ class EWSClient(EasySeedLinkClient):
         with lock:
             buf = sta_buffers[sta]
             buf["sr"] = float(trace.stats.sampling_rate)
-            # Batas maxlen sesuai SR
+            
             new_maxlen = int(buf["sr"] * 300)  # 5 menit
             if buf["data"].maxlen != new_maxlen:
                 buf["data"] = collections.deque(buf["data"], maxlen=new_maxlen)
             for v in trace.data:
                 buf["data"].append(float(v))
 
-            # Jalankan STA/LTA
+           
             arr    = np.array(buf["data"])
             sr_int = int(buf["sr"])
             if len(arr) < sr_int * 20:
@@ -280,7 +278,7 @@ def run_seedlink():
             print(f"SeedLink reconnect: {e}")
             time.sleep(10)
 
-# ── Pemroses trigger background ───────────────────────────────
+
 async def trigger_processor():
     while True:
         event = process_triggers()
@@ -295,12 +293,12 @@ async def trigger_processor():
             connected_ws -= dead
         await asyncio.sleep(2)
 
-# ── WebSocket handler ─────────────────────────────────────────
+
 async def handler(websocket):
     connected_ws.add(websocket)
     print(f"EWS client terhubung: {websocket.remote_address}")
     try:
-        # Kirim status stasiun saat pertama konek
+        
         with lock:
             status = [{
                 "sta"      : s["sta"],
@@ -311,7 +309,7 @@ async def handler(websocket):
             } for s in STATIONS]
         await websocket.send(json.dumps({"type": "station_status", "data": status}))
 
-        # Keep alive + kirim status berkala
+       
         while True:
             with lock:
                 status = [{
@@ -340,6 +338,6 @@ async def main():
         asyncio.create_task(trigger_processor())
         await asyncio.Future()
 
-# Mulai SeedLink di thread terpisah
+
 threading.Thread(target=run_seedlink, daemon=True).start()
 asyncio.run(main())
