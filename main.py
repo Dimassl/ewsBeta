@@ -1,5 +1,4 @@
 
-
 import asyncio, json, threading, time, collections, math, os
 import numpy as np
 from obspy.clients.seedlink.easyseedlink import EasySeedLinkClient
@@ -7,13 +6,13 @@ from obspy.signal.trigger import classic_sta_lta, trigger_onset
 from obspy.taup import TauPyModel
 import websockets
 
-# ---Semua code milik Allah Swt. ---
+# ---Semua code milik Allah SWT ---
 
 print("Loading TauP model (iasp91)...")
 TAUP_MODEL = TauPyModel(model="iasp91")
 print("TauP OK")
 
-# ── List Satation──────────────────────────────────
+# List Satation
 STATIONS = [
     {"net":"GE","sta":"BBJI", "cha":"BHZ","lat":-7.46,"lon":107.65,"label":"Garut"},
     {"net":"GE","sta":"UGM",  "cha":"SHZ","lat":-7.91,"lon":110.52,"label":"WanaGAMA"},
