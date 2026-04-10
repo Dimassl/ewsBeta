@@ -47,7 +47,7 @@ STATIONS = [
     # Maluku & sekitar
     {"net":"GE","sta":"TNTI", "cha":"BHZ","lat": 0.77,"lon":127.37,"label":"Ternate",
      "thr_on":4.0,"thr_off":0.7},
-    {"net":"GE","sta":"SANI", "cha":"BHZ","lat":-2.05°,"lon": 125.99,"label":"Sanana",
+    {"net":"GE","sta":"SANI", "cha":"BHZ","lat":-2.05,"lon": 125.99,"label":"Sanana",
      "thr_on":3.5,"thr_off":0.6},    
     {"net":"GE","sta":"SAUI", "cha":"BHZ","lat":-7.98,"lon":131.3,"label":"Tanibar",
      "thr_on":3.5,"thr_off":0.6},
