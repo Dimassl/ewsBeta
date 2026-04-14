@@ -64,7 +64,7 @@ GEOFON_HOST   = "geofon.gfz-potsdam.de"
 GEOFON_PORT   = 18000
 STA_SEC       = 0.5
 LTA_SEC       = 12.0       
-MIN_STATIONS  = 3
+MIN_STATIONS  = 4
 ASSOC_WINDOW  = 120     
 EARTH_R       = 6371.0
 GRID_POINTS   = 10000
@@ -222,6 +222,63 @@ def move_on_globe(lat_r,lon_r,ang,dist_r):
     z=sd*cl*cg+cd*sl
     z=max(-1.0,min(1.0,z))
     return math.asin(z), math.atan2(y,x)
+
+def azimuth_gap(triggers, epicenter):
+    """
+    Hitung gap maksimum antar stasiun dalam lingkaran azimuth.
+    Gap > 180° = stasiun tidak melingkupi episenter = lokasi tidak reliable.
+    Standar USGS: gap < 180° untuk laporan resmi.
+    """
+    azimuths = []
+    for tr in triggers:
+        dlon = math.radians(tr["lon"] - epicenter["lon"])
+        y = math.sin(dlon) * math.cos(math.radians(tr["lat"]))
+        x = (math.cos(math.radians(epicenter["lat"])) * math.sin(math.radians(tr["lat"])) -
+             math.sin(math.radians(epicenter["lat"])) * math.cos(math.radians(tr["lat"])) * math.cos(dlon))
+        az = (math.degrees(math.atan2(y, x)) + 360) % 360
+        azimuths.append(az)
+
+    azimuths.sort()
+    gaps = [azimuths[i+1] - azimuths[i] for i in range(len(azimuths)-1)]
+    gaps.append(360 - azimuths[-1] + azimuths[0])  # wrap-around gap
+    return max(gaps)
+
+def is_likely_teleseismic(triggers, epicenter):
+    """
+    Gempa lokal: gelombang tiba dari stasiun terdekat dalam waktu singkat.
+    Teleseismik: semua stasiun menerima hampir bersamaan (karena gelombang sudah
+    hampir horizontal saat tiba dari jauh).
+    
+    Jika selisih waktu tiba antar stasiun < 10 detik padahal jarak antar
+    stasiun > 500 km → kemungkinan teleseismik.
+    """
+    if len(triggers) < 3:
+        return False
+    
+    # Stasiun terdekat dan terjauh dari episenter
+    dists = [dist_km(epicenter["lat"], epicenter["lon"], t["lat"], t["lon"]) 
+             for t in triggers]
+    min_dist = min(dists)
+    max_dist = max(dists)
+    
+    # Jika stasiun terdekat > 300 km dari episenter yang diestimasi
+    # kemungkinan besar false location
+    if min_dist > 300:
+        print(f"[FILTER] Stasiun terdekat {min_dist:.0f} km — kemungkinan teleseismik")
+        return True
+    
+    # Cek spread waktu tiba
+    t_arrive = sorted([t["t_arrive"] for t in triggers])
+    time_spread = t_arrive[-1] - t_arrive[0]  # detik
+    sta_dist_spread = max_dist - min_dist  # km
+    
+    # Kalau spread waktu < 15 detik tapi jarak antar stasiun > 800 km
+    # → gelombang datang hampir horizontal = teleseismik
+    if time_spread < 15 and sta_dist_spread > 800:
+        print(f"[FILTER] Time spread {time_spread:.1f}s, sta spread {sta_dist_spread:.0f}km — teleseismik")
+        return True
+    
+    return False
 
 # State 
 sta_cfg = {s["sta"]: s for s in STATIONS}
