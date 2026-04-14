@@ -16,25 +16,25 @@ STATIONS = [
     {"net":"GE","sta":"BBJI", "cha":"BHZ","lat":-7.46,"lon":107.65,"label":"Garut",
      "thr_on":5.5,"thr_off":0.8},
     {"net":"GE","sta":"UGM",  "cha":"SHZ","lat":-7.91,"lon":110.52,"label":"WanaGAMA",
-     "thr_on":6.4,"thr_off":1.0},   
+     "thr_on":7.4,"thr_off":1.0},   
     {"net":"GE","sta":"JAGI", "cha":"BHZ","lat":-8.47,"lon":114.15,"label":"Banyuwangi",
-     "thr_on":4.5,"thr_off":0.7},
+     "thr_on":8.5,"thr_off":0.7},
     {"net":"GE","sta":"SMRI", "cha":"BHZ","lat":-7.050,"lon":110.440,"label":"Semarang",
-     "thr_on":5.5,"thr_off":0.9},
+     "thr_on":7.5,"thr_off":0.9},
     
     # Sumatera — variasi noise
     {"net":"GE","sta":"LHMI", "cha":"BHZ","lat": 5.23,"lon": 96.95,"label":"Lhokseumawe",
-     "thr_on":4.0,"thr_off":0.7},
+     "thr_on":8.0,"thr_off":0.7},
     {"net":"GE","sta":"MNAI", "cha":"BHZ","lat": -4.36,"lon": 102.96,"label":"Bengkulu",
-     "thr_on":3.8,"thr_off":0.6},
+     "thr_on":7.8,"thr_off":0.6},
     {"net":"GE","sta":"GSI",  "cha":"BHZ","lat": 1.3,"lon":97.58,"label":"NIAS",
-     "thr_on":3.8,"thr_off":0.7},
+     "thr_on":7.8,"thr_off":0.7},
   
     # Sulawesi
     {"net":"GE","sta":"TOLI2","cha":"BHZ","lat": 1.11,"lon":120.78,"label":"Toli-Toli",
-     "thr_on":4.0,"thr_off":0.7},
+     "thr_on":7.0,"thr_off":0.7},
     {"net":"GE","sta":"LUWI", "cha":"BHZ","lat":-1.04,"lon":122.77,"label":"Luwuk",
-     "thr_on":3.8,"thr_off":0.6},
+     "thr_on":7.8,"thr_off":0.6},
     
     # Nusa Tenggara
     {"net":"GE","sta":"SOEI", "cha":"BHZ","lat":-9.76,"lon":124.27,"label":"Soe NTT",
@@ -46,17 +46,17 @@ STATIONS = [
     
     # Maluku & sekitar
     {"net":"GE","sta":"TNTI", "cha":"BHZ","lat": 0.77,"lon":127.37,"label":"Ternate",
-     "thr_on":4.0,"thr_off":0.7},
+     "thr_on":7.0,"thr_off":0.7},
     {"net":"GE","sta":"SANI", "cha":"BHZ","lat":-2.05,"lon": 125.99,"label":"Sanana",
-     "thr_on":3.5,"thr_off":0.6},    
+     "thr_on":7.5,"thr_off":0.6},    
     {"net":"GE","sta":"SAUI", "cha":"BHZ","lat":-7.98,"lon":131.3,"label":"Tanibar",
-     "thr_on":3.5,"thr_off":0.6},
+     "thr_on":7.5,"thr_off":0.6},
     {"net":"GE","sta":"BNDI", "cha":"BHZ","lat":-4.52,"lon":129.9,"label":"BandaNeira",
-     "thr_on":3.5,"thr_off":0.6},
+     "thr_on":6.5,"thr_off":0.6},
     
     # Papua
     {"net":"GE","sta":"FAKI", "cha":"BHZ","lat":-2.92,"lon":132.25,"label":"Fak-Fak",
-     "thr_on":3.5,"thr_off":0.6},
+     "thr_on":6.5,"thr_off":0.6},
     
 ]
 
